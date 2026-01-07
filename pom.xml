@@ -61,6 +61,27 @@
         <scope>test</scope>
     </dependency>
     
+       <!-- Apache POI core -->
+      <dependency>
+       <groupId>org.apache.poi</groupId>
+       <artifactId>poi</artifactId>
+       <version>5.2.5</version>
+   </dependency>
+
+       <!-- Apache POI OOXML (.xlsx) -->
+      <dependency>
+       <groupId>org.apache.poi</groupId>
+       <artifactId>poi-ooxml</artifactId>
+       <version>5.2.5</version>
+   </dependency>
+   
+       <!-- Get Rid of Errors (.xlsx) -->
+      <dependency>
+       <groupId>commons-io</groupId>
+       <artifactId>commons-io</artifactId>
+       <version>2.15.1</version>
+   </dependency>
+   
         <!-- TestNG -->
         <dependency>
             <groupId>org.testng</groupId>

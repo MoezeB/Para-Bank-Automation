@@ -13,147 +13,118 @@ import com.excel.read.ExcelManager;
 import com.excel.read.HandleExampleTableData;
 import com.utilities.BaseConfigurations;
 
-import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 public class StepDef {
-
+	
 	WebDriver driver;
 	WebDriverWait wait;
 	SeleniumPF pf;
 	SoftAssert sa;
 	BaseConfigurations config;
-
+	
 	@Given("Open the browser")
-	public void open_the_browser() { // java method=void
-		driver = new ChromeDriver(); // help from class = upcasting
-		driver.manage().window().maximize();
-
-		// implicit = HTML Load
-		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
+	public void open_the_browser() {//java method=void
+	    driver = new ChromeDriver(); //help from class = upcasting
+	    driver.manage().window().maximize();
 	}
-
+	
 	@Given("Go to the Para Bank Application")
-	public void go_to_the_para_bank_application() throws Exception {
+	public void go_to_the_para_bank_application() throws Exception 	{
 		config = new BaseConfigurations();
-
+		
 		driver.navigate().to(config.getConfigurations("URL_Link"));
-
-		// page Load timeout --> GUI
-		// ✅ Initialize wait object here
-		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-
-		// PageFactory initialized ONCE
-		pf = new SeleniumPF(driver);
+		
+	    // implicit = HTML Load
+	    driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
+	   
+	    // page Load timeout --> GUI
+	    // ✅ Initialize wait object here
+	    wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	    
+	    pf = new SeleniumPF(driver); // initialize once here
 	}
-
-	/* =========================
-	   POSITIVE FLOW – STATIC DATA
-	   ========================= */
 
 	@When("Insert valid username")
 	public void insert_valid_username() {
-		wait.until(ExpectedConditions.visibilityOf(pf.getUsername()));
-		pf.getUsername().sendKeys("student"); // correct ParaBank login
+		wait.until(ExpectedConditions.visibilityOf(pf.getUsername())); // ✅ wait is initialized now
+		pf.getUsername().sendKeys("student"); //related object
 	}
-
+	
 	@When("Insert valid password")
 	public void insert_valid_password() {
 		wait.until(ExpectedConditions.visibilityOf(pf.getPassword()));
 		pf.getPassword().sendKeys("qa1234");
 	}
-
+	
 	@When("Click the login button")
 	public void click_the_login_button() {
 		wait.until(ExpectedConditions.elementToBeClickable(pf.getLoginBtn()));
 		pf.getLoginBtn().click();
 	}
-
+	
 	@Then("Login should pass, with logout button visible")
 	public void login_should_pass_with_logout_button_visible() {
 		System.out.println("Test PASSED!");
-
 		wait.until(ExpectedConditions.visibilityOf(pf.getLogoutBtn()));
-
-		// Soft assert (preferred for advanced frameworks)
+		//check if visible
+		//pf.getLogoutBtn().isDisplayed();
+		// Condition to check --> Logout button should be visible
+		//hard assert
+		//Assert.assertTrue(condition);
+		//Soft assert
 		sa = new SoftAssert();
 		sa.assertTrue(pf.getLogoutBtn().isDisplayed());
 		sa.assertAll();
+		driver.quit();
 	}
-
-	/* =========================
-	   NEGATIVE FLOW – STATIC DATA
-	   ========================= */
-
+	
 	@When("Insert null value in username")
 	public void insert_null_value_in_username() {
 		wait.until(ExpectedConditions.visibilityOf(pf.getUsername()));
-		pf.getUsername().clear(); // ✅ safer than sendKeys("")
+		pf.getUsername().sendKeys("");
 	}
-
+	
 	@When("Insert invalid password")
 	public void insert_invalid_password() {
 		wait.until(ExpectedConditions.visibilityOf(pf.getPassword()));
 		pf.getPassword().sendKeys("qa1233");
 	}
 
+	@When("Insert valid username {string}")
+	public void insert_valid_username(String username) throws Exception {
+		wait.until(ExpectedConditions.visibilityOf(pf.getUsername())); // ✅ wait is initialized now
+		pf.getUsername().sendKeys(username); //related object
+		
+		//split & break username
+		HandleExampleTableData obj = new HandleExampleTableData();
+		int row = obj.getActualRow(username);
+		int col = obj.getActualCol(username);
+		
+		//Apache POI reads excel data based on row & col
+		ExcelManager em = new ExcelManager();
+		//get actual username
+		em.readCellData(row, col);
+		
+		pf.getUsername().sendKeys(em.readCellData(row, col)); //related object
+	}
+	
+	@When("Insert valid password {string}")
+	public void insert_valid_password(String Password) {
+		wait.until(ExpectedConditions.visibilityOf(pf.getPassword()));
+		pf.getPassword().sendKeys(Password);
+	}
+	
 	@Then("Login should fail, with logout button not visible")
 	public void login_should_fail_with_logout_button_not_visible() {
 		wait.until(ExpectedConditions.visibilityOf(pf.getErrorMsgwinvalidCredentials()));
 		System.out.println("Login FAILED!");
-
 		sa = new SoftAssert();
 		sa.assertTrue(pf.getErrorMsgwinvalidCredentials().isDisplayed());
 		sa.assertAll();
-	}
-
-	/* =========================
-	   SCENARIO OUTLINE – SECURE DATA
-	   ========================= */
-
-	@When("Insert valid username {string}")
-	public void insert_valid_username_from_excel(String celldata) throws Exception {
-
-		wait.until(ExpectedConditions.visibilityOf(pf.getUsername()));
-
-		HandleExampleTableData obj = new HandleExampleTableData();
-		int row = obj.getActualRow(celldata);
-		int col = obj.getActualCol(celldata);
-
-		ExcelManager em = new ExcelManager();
-		String username = em.readCellData(row, col);
-
-		pf.getUsername().sendKeys(username);
-	}
-
-
-	@When("Insert valid password {string}")
-	public void insert_valid_password_from_excel(String celldata) throws Exception {
-
-		wait.until(ExpectedConditions.visibilityOf(pf.getPassword()));
-
-		HandleExampleTableData obj = new HandleExampleTableData();
-		int row = obj.getActualRow(celldata);
-		int col = obj.getActualCol(celldata);
-
-		ExcelManager em = new ExcelManager();
-		String password = em.readCellData(row, col);
-
-		pf.getPassword().sendKeys(password);
-	}
-
-
-	/* =========================
-	   CLEANUP – runs after EACH scenario
-	   ========================= */
-
-	@After
-	public void tearDown() {
-		if (driver != null) {
-			driver.quit();
-		}
-	}
+		driver.quit();
+    }
+	
 }
-
