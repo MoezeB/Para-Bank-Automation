@@ -2,7 +2,7 @@ package com.interview;
 
 import java.util.Arrays; 
 
-public class PracticeArrays {
+public class JavaArrayPractice0 {
 
 	public void getValue(String [][] array, String []user, String []password) {
 		
@@ -26,7 +26,7 @@ public class PracticeArrays {
 	String [] user = {"student", "stude"};
 	String [] password = {"qa1234","qa1233"};
 	
-	PracticeArrays obj = new PracticeArrays();
+	JavaArrayPractice0 obj = new JavaArrayPractice0();
 	obj.getValue(array,user,password);
 		
 	}
